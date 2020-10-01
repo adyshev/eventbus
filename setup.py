@@ -26,19 +26,12 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
     description="Domain Entity, Events and Root Aggregate extracted from the johnbywater/eventsourcing library."
                 "Handy for building DDD applications without eventsourcing or with custom (async) storage layer"
                 "implementation.",
-    entry_points={
-        'console_scripts': [
-            'eventbus=eventbus.cli:main',
-        ],
-    },
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,
