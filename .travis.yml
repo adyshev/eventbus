@@ -1,0 +1,18 @@
+language: python
+python:
+- 3.8
+- 3.7
+- 3.6
+- 3.5
+install: pip install -U tox-travis
+script: tox
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  user: adyshev
+  password:
+    secure: Vgmc+WBWpEoombskgL1hKHXJOanX719rpAvSBA7QQYU1kedzvYhPxbn3my54fvFbu78tSZVrwS5bv8iBLOf89Z3OaUwOKsndNbAX9qU6K+jWM8SSrH++YOXFtRnyusq0ilnnhfTt81maE1Vhg7djLJ6ijEdf69nOwy8U1I78wy2F0hIXTNMHFKIrwLJHYs5wkzn8r7fbLTSx3ZUpuTG5Jo9G30A1U2PYWyEcCqnh7qwUZsGctmgrYiOE08CObl61V/VX4CfiQJORHDPQieTrm2jOfvbXhkn6hElchLGm+iN+u7LOihEq3zX/xljsI1VvsihOhUA2hIvuMexGRETi0FDhxlvc72GN5uTzFdcKcTSoiWKEn8wNe6fovcJAv/JKut5znkIANjv+gLkEfnCLylmDOcsimCrX0n4Gk512mh6fl7Q+gNkaGAtoMUHKhZZGzKrBipzRgoy2IAA7RxgjSUM7DGsJ47YqD71YHdmvlngOnEQc0dKkopm0reFwcR4gvcwjgZwp6uxXOkQCzqVq7Az8I6743nB2uxE3J2TXQheKj0zx/yudpAk/9Gg6bgiGUyPn+u8VunfanEGG+f0aziiSc1BBPshd9gjru+PceCu6Po5YepNICIIcDlbDzhbEwY85dpoNgEWXwrGtVMYs+Okx9SN4+z06yWgxZu9G5J4=
+  on:
+    tags: true
+    repo: adyshev/eventbus
+    python: 3.8
