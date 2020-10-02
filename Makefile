@@ -62,6 +62,15 @@ coverage: ## check code coverage quickly with the default Python
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
+bump-patch: ## Bump patch version
+	bumpversion patch ./setup.py  ./eventbus/__init__.py --allow-dirty --tag
+
+bump-minor: ## Bump minor version
+	bumpversion minor ./setup.py  ./eventbus/__init__.py --allow-dirty --tag
+
+bump-minor: ## Bump major version
+	bumpversion major ./setup.py  ./eventbus/__init__.py --allow-dirty --tag
+
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/eventbus.rst
 	rm -f docs/modules.rst
