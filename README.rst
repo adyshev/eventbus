@@ -20,8 +20,14 @@ Domain Entities, Root Aggregate, Events and Event Bus
 
 
 
-Domain Entity, Events and Root Aggregate extracted from the johnbywater/eventsourcing library.
-Handy for building DDD applications without eventsourcing or with custom (async) storage implementation.
+Domain Entity, Root Aggregate, Bus and Events extracted from the awesome johnbywater/eventsourcing library and
+async support was added.
+
+Main Package documentation is available on <http://eventsourcing.readthedocs.io/>.
+
+Motivation: I don't like evensourcing conceptually, I don't want to have event store in my projects at all. Howewer,
+I do like DDD concepts incl. Domain Entities, Aggregates and Domain Events and the way how they were
+implemented by johnbywater. Also I would like to have async supported.
 
 * Free software: MIT license
 * Documentation: https://eventbus.readthedocs.io.
@@ -31,3 +37,4 @@ Features
 --------
 
 * async support
+* store agnostic
