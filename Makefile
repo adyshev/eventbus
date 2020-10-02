@@ -68,7 +68,7 @@ bump-patch: ## Bump patch version
 bump-minor: ## Bump minor version
 	bumpversion minor ./setup.py  ./eventbus/__init__.py --allow-dirty --tag
 
-bump-minor: ## Bump major version
+bump-major: ## Bump major version
 	bumpversion major ./setup.py  ./eventbus/__init__.py --allow-dirty --tag
 
 docs: ## generate Sphinx HTML documentation, including API docs
