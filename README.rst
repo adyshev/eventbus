@@ -4,7 +4,7 @@ Domain Entities, Root Aggregate, Events and Event Bus
 
 
 .. image:: https://img.shields.io/pypi/v/eventbus.svg
-        :target: https://pypi.python.org/pypi/eventbus
+        :target: https://pypi.python.org/pypi/domain-eventbus
 
 .. image:: https://img.shields.io/travis/adyshev/eventbus.svg
         :target: https://travis-ci.com/adyshev/eventbus
@@ -19,7 +19,6 @@ Domain Entities, Root Aggregate, Events and Event Bus
      :alt: Updates
 
 
-
 Domain Entity, Root Aggregate, Bus and Events extracted from the awesome johnbywater/eventsourcing library and
 async support was added.
 
@@ -31,7 +30,6 @@ implemented by johnbywater. Also I would like to have async supported.
 
 * Free software: MIT license
 * Documentation: https://eventbus.readthedocs.io.
-
 
 Features
 --------
