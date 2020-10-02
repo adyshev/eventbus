@@ -6,6 +6,7 @@ install: pip install -U tox-travis
 script: tox
 deploy:
   provider: pypi
+  skip_cleanup: true
   distributions: sdist bdist_wheel
   user: adyshev
   password:

@@ -16,17 +16,6 @@ setup_requirements = ["pytest-runner", ]
 
 test_requirements = ["pytest>=3", ]
 
-description = """
-Domain Entity, Root Aggregate, Bus and Events extracted from the awesome johnbywater/eventsourcing library and
-async support was added.
-
-Main Package documentation is available on <http://eventsourcing.readthedocs.io/>.
-
-Motivation: I don't like evensourcing conceptually, I don't want to have event store in my projects at all. Howewer,
-I do like DDD concepts incl. Domain Entities, Aggregates and Domain Events and the way how they were
-implemented by johnbywater. Also I would like to have async supported.
-"""
-
 setup(
     author="Alexander A. Dyshev",
     author_email="adyshev@gmail.com",
@@ -43,8 +32,6 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    description=description,
-    long_description=readme + "\n\n" + history,
     keywords=[
         "async domain entity",
         "async event bus",
@@ -60,6 +47,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/adyshev/eventbus",
-    version="0.1.0",
+    version="0.1.2",
     zip_safe=False,
 )
