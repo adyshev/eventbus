@@ -1,22 +1,49 @@
 # -*- coding: utf-8 -*-
+from typing import List, Optional, Union, Type, Tuple
+
 import pytest
 
 from eventbus.application.eventbus import EventBus
+from eventbus.domain.eventbus import AbstractEventHandler
+from eventbus.domain.events import DomainEvent
+from eventbus.domain.whitehead import TEvent, T
 from eventbus.example.entity import Example
 
 
 @pytest.mark.asyncio
 async def test_example_entity():
-    bus = EventBus()
-
-    assert bus.assert_event_handlers_empty() is None
-
     received_events = []
 
-    async def receive_events(events):
-        received_events.extend(events)
+    class SomeEvent(DomainEvent):
+        pass
 
-    bus.subscribe(handler=receive_events)
+    class NonExistentEventsTestHandler(AbstractEventHandler):
+        @property
+        def event_type(self) -> Optional[Union[str, Type, Tuple]]:
+            return SomeEvent
+
+        async def handler(self, events: List[TEvent]):
+            received_events.extend(events)
+
+    class AllEventsTestHandler(AbstractEventHandler):
+        @property
+        def event_type(self) -> Union[str, Type, Tuple]:
+            return self.ASTERISK
+
+        async def handler(self, events: List[TEvent]):
+            received_events.extend(events)
+
+    handler1 = AllEventsTestHandler()
+    handler2 = NonExistentEventsTestHandler()
+
+    bus = EventBus(handlers=[
+        handler1, handler2
+    ])
+
+    # Same instance of handler will be skipped
+    bus.subscribe(handler1)
+    # No such events thus skipping as well
+    bus.subscribe(handler2)
 
     # "Example.Created" has been added to a pending list (Domain Root Entity)
     example = await Example.__create__(event_bus=bus, first_name="First", last_name="Last", age=56)
