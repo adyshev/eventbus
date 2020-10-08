@@ -16,7 +16,14 @@ setup_requirements = ["pytest-runner", "pyyaml>=5.3.1", "argh>=0.26.2"]
 
 test_requirements = ["pytest>=3", ]
 
-long_description = readme + "\n|\n" + history
+long_description = """
+Domain Entities, Root Aggregate, Events and EventBus with Async flavor.
+(Based on awasome johnbywater/eventsourcing library)
+
+`Package documentation is now available <https://eventbus.readthedocs.io/>`_.
+
+`Please raise issues on GitHub <https://github.com/adyshev/eventbus/issues>`_.
+"""
 
 setup(
     description="Domain Entities, Root Aggregate, Events and EventBus with Async flavor",
@@ -52,6 +59,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/adyshev/eventbus",
-    version="0.1.9",
+    version="0.1.7",
     zip_safe=False,
 )
