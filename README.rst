@@ -1,9 +1,8 @@
-=====================================
-Domain Entities, Root Aggregate, Events and Event Bus
-=====================================
+======================================================================
+Domain Entities, Root Aggregate, Events and EventBus with Async flavor
+======================================================================
 
-
-.. image:: https://img.shields.io/pypi/v/eventbus.svg
+.. image:: https://img.shields.io/pypi/v/domain_eventbus.svg
         :target: https://pypi.python.org/pypi/domain-eventbus
 
 .. image:: https://img.shields.io/travis/adyshev/eventbus.svg
@@ -18,15 +17,12 @@ Domain Entities, Root Aggregate, Events and Event Bus
      :target: https://pyup.io/repos/github/adyshev/eventbus/
      :alt: Updates
 
+|
 
-Domain Entity, Root Aggregate, Bus and Events extracted from the awesome johnbywater/eventsourcing library and
-async support was added.
+Domain Entity, Root Aggregate, Bus and Events from the awesome johnbywater/eventsourcing library with
+async support added.
 
-Main Package documentation is available on <http://eventsourcing.readthedocs.io/>.
-
-Motivation: I don't like evensourcing conceptually, I don't want to have event store in my projects at all. Howewer,
-I do like DDD concepts incl. Domain Entities, Aggregates and Domain Events and the way how they were
-implemented by johnbywater. Also I would like to have async supported.
+.. _Github repo: https://github.com/johnbywater/eventsourcing
 
 * Free software: MIT license
 * Documentation: https://eventbus.readthedocs.io.
@@ -35,4 +31,4 @@ Features
 --------
 
 * async support
-* store agnostic
+* storage agnostic
