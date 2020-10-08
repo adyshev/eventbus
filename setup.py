@@ -16,7 +16,17 @@ setup_requirements = ["pytest-runner", "pyyaml>=5.3.1", "argh>=0.26.2"]
 
 test_requirements = ["pytest>=3", ]
 
+long_description = """
+A library for event sourcing in Python.
+
+`Package documentation is now available <https://eventbus.readthedocs.io/>`_.
+
+`Please raise issues on GitHub <https://github.com/adyshev/eventbus/issues>`_.
+"""
+
 setup(
+    description="Domain Entities, Root Aggregate, Events and EventBus with Async flavor",
+    long_description=long_description,
     author="Alexander A. Dyshev",
     author_email="adyshev@gmail.com",
     python_requires=">=3.7",
@@ -34,6 +44,7 @@ setup(
     ],
     keywords=[
         "async domain entity",
+        "domain events",
         "async event bus",
         "async aggregate root",
         "domain eventbus"
