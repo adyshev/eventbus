@@ -16,3 +16,8 @@ History
 ------------------
 
 * Cleanup: Docs, Labels
+
+0.1.9 (2020-10-07)
+------------------
+
+* Cleanup: Docs, setup.py
