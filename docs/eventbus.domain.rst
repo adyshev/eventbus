@@ -52,14 +52,6 @@ eventbus.domain.exceptions module
    :undoc-members:
    :show-inheritance:
 
-eventbus.domain.versioning module
----------------------------------
-
-.. automodule:: eventbus.domain.versioning
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 eventbus.domain.whitehead module
 --------------------------------
 
