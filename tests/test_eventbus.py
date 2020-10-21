@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+from time import sleep
 from typing import List, Optional, Union, Type, Tuple
+from uuid import uuid4
 
 import pytest
 
@@ -8,6 +10,7 @@ from eventbus.domain.eventbus import AbstractEventHandler
 from eventbus.domain.events import DomainEvent
 from eventbus.domain.whitehead import TEvent, T
 from eventbus.example.entity import Example
+from eventbus.util.time import decimaltimestamp
 
 
 @pytest.mark.asyncio
@@ -48,6 +51,9 @@ async def test_example_entity():
     # "Example.Created" has been added to a pending list (Domain Root Entity)
     example = await Example.__create__(event_bus=bus, first_name="First", last_name="Last", age=56)
 
+    assert example.__created_on__ == example.__last_modified__
+    assert example.__version__ == 0
+
     assert len(example.__pending_events__) == 1
     assert len(received_events) == 0
 
@@ -56,8 +62,10 @@ async def test_example_entity():
         # "Example.ExampleInternalAdded" bas been added to a pending list (Domain Root Entity)
         await example.add(value)
 
+    assert example.__last_modified__ > example.__created_on__
+
     # 3x "ExampleInternal.Created"
-    assert len(received_events) == 3
+    assert example.__version__ == len(received_events) == 3
 
     # 1x "Example.Created" + 3x "Example.ExampleInternalAdded"
     assert len(example.__pending_events__) == 4
@@ -65,9 +73,41 @@ async def test_example_entity():
     # 1x "Example.Created" has been published
     await example.__save__()
 
+    # Created should't affect version
+    assert example.__version__ == 3
+
     assert example.summ == 60
 
     assert len(example.__pending_events__) == 0
 
     # 3x "ExampleInternal.Created" + 1x "Example.Created" + 3x "ExampleInternal.Created"
     assert len(received_events) == 7
+
+    # Clear all the events
+    received_events.clear()
+
+    created = decimaltimestamp()
+    sleep(0.1)
+    updated = decimaltimestamp()
+
+    # We also can instantiate entity with custom __created_on__ and __last_modified__ fields
+    example2 = Example(
+        id=uuid4(),
+        event_bus=bus,
+        first_name="First",
+        last_name="Last",
+        age=56,
+        __version__=0,
+        __created_on__=created,
+        __last_modified__=updated
+    )
+
+    assert example2.__created_on__ != example2.__last_modified__
+    assert example2.__created_on__ == created
+    assert example2.__last_modified__ == updated
+
+    sleep(0.1)
+
+    await example2.add(10)
+
+    assert example2.__last_modified__ > updated

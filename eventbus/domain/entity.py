@@ -135,7 +135,6 @@ class DomainEntity(Upcastable, EnduringObject, metaclass=MetaDomainEntity):
             kwargs["id"] = kwargs.pop("originator_id")
             kwargs.pop("originator_topic", None)
             kwargs.pop("__event_topic__", None)
-            kwargs.pop("__event_hash_method_name__", None)
             return kwargs
 
     def __init__(self, event_bus: AbstractEventBus, id: UUID, **kwargs):
@@ -362,10 +361,10 @@ TTimestampedEntity = TypeVar("TTimestampedEntity", bound="TimestampedEntity")
 
 
 class TimestampedEntity(DomainEntity):
-    def __init__(self, __created_on__: Decimal, **kwargs: Any):
+    def __init__(self, __created_on__: Decimal, __last_modified__: Optional[Decimal] = None, **kwargs: Any):
         super(TimestampedEntity, self).__init__(**kwargs)
         self.___created_on__ = __created_on__
-        self.___last_modified__ = __created_on__
+        self.___last_modified__ = __last_modified__ or __created_on__
 
     @property
     def __created_on__(self) -> Decimal:

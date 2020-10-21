@@ -21,3 +21,13 @@ History
 ------------------
 
 * Cleanup: Docs, setup.py
+
+0.1.10 (2020-10-09)
+-------------------
+
+* Cleanup: Docs, setup.py
+
+0.1.11 (2020-10-09)
+-------------------
+
+* Adding possibility to specify custom __last_modified__ during entity instantiation
