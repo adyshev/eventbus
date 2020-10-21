@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime, timezone
 from uuid import UUID
 from typing import Any, Generic, Optional
-from decimal import Decimal
 
 from eventbus.domain.whitehead import ActualOccasion, TEntity
 from eventbus.util.hashing import hash_object
-from eventbus.util.time import decimaltimestamp
 from eventbus.util.topic import get_topic
 from eventbus.util.transcoding import ObjectJSONEncoder
 
@@ -154,14 +153,14 @@ class EventWithTimestamp(DomainEvent[TEntity]):
     For events that have a timestamp value.
     """
 
-    def __init__(self, timestamp: Optional[Decimal] = None, **kwargs: Any):
-        kwargs["timestamp"] = timestamp or decimaltimestamp()
+    def __init__(self, timestamp: Optional[datetime] = None, **kwargs: Any):
+        kwargs["timestamp"] = timestamp or datetime.now(tz=timezone.utc)
         super(EventWithTimestamp, self).__init__(**kwargs)
 
     @property
-    def timestamp(self) -> Decimal:
+    def timestamp(self) -> datetime:
         """
-        A UNIX timestamp as a Decimal object.
+        A UNIX timestamp as a datetime object.
         """
         return self.__dict__["timestamp"]
 

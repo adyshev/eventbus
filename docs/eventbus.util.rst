@@ -12,14 +12,6 @@ eventbus.util.hashing module
    :undoc-members:
    :show-inheritance:
 
-eventbus.util.time module
--------------------------
-
-.. automodule:: eventbus.util.time
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 eventbus.util.topic module
 --------------------------
 

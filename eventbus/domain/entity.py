@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from abc import ABCMeta
+from datetime import datetime
 from uuid import UUID, uuid4
 from typing import Any, Dict, List, Type, Union, TypeVar, Optional
-from decimal import Decimal
 
 from eventbus.domain.decorators import subclassevents
 from eventbus.domain.eventbus import AbstractEventBus
@@ -243,17 +243,17 @@ TTimestampedEntity = TypeVar("TTimestampedEntity", bound="TimestampedEntity")
 
 
 class TimestampedEntity(DomainEntity):
-    def __init__(self, __created_on__: Decimal, **kwargs: Any):
+    def __init__(self, __created_on__: datetime, **kwargs: Any):
         super(TimestampedEntity, self).__init__(**kwargs)
         self.___created_on__ = __created_on__
         self.___last_modified__ = __created_on__
 
     @property
-    def __created_on__(self) -> Decimal:
+    def __created_on__(self) -> datetime:
         return self.___created_on__
 
     @property
-    def __last_modified__(self) -> Decimal:
+    def __last_modified__(self) -> datetime:
         return self.___last_modified__
 
     class Event(DomainEntity.Event[TTimestampedEntity], EventWithTimestamp[TTimestampedEntity]):

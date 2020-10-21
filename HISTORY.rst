@@ -41,3 +41,8 @@ History
 -------------------
 
 * Revert 0.1.11, __last_modified__ reverted back to internal only value
+
+0.1.14 (2020-10-21)
+-------------------
+
+* Time. Moved from Decimal to Datetime format

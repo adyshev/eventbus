@@ -10,7 +10,6 @@ from eventbus.domain.eventbus import AbstractEventHandler
 from eventbus.domain.events import DomainEvent
 from eventbus.domain.whitehead import TEvent, T
 from eventbus.example.entity import Example
-from eventbus.util.time import decimaltimestamp
 
 
 @pytest.mark.asyncio
