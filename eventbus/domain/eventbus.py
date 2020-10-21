@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Type, Union, Optional
+from typing import List, Tuple, Type, Union
 
 from eventbus.domain.whitehead import TEvent
 

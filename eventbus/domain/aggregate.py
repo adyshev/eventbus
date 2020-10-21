@@ -2,29 +2,26 @@
 from typing import Any, List, Deque, Union, Generic, TypeVar
 from collections import deque
 
-from eventbus.domain.entity import TimestampedVersionedEntity, DomainEntity, TDomainEvent
+from eventbus.domain.entity import DomainEntity, TDomainEvent, TimestampedEntity
 from eventbus.domain.events import DomainEvent
 
 TAggregate = TypeVar("TAggregate", bound="BaseAggregateRoot")
 TAggregateEvent = TypeVar("TAggregateEvent", bound="BaseAggregateRoot.Event")
 
 
-class BaseAggregateRoot(TimestampedVersionedEntity, Generic[TAggregateEvent]):
+class BaseAggregateRoot(TimestampedEntity, Generic[TAggregateEvent]):
     """
     Root entity for an aggregate in a domain driven design.
     """
 
-    class Event(TimestampedVersionedEntity.Event[TAggregate]):
+    class Event(TimestampedEntity.Event[TAggregate]):
         """Supertype for base aggregate root events."""
 
-    class Created(TimestampedVersionedEntity.Created[TAggregate], Event[TAggregate]):
+    class Created(TimestampedEntity.Created[TAggregate], Event[TAggregate]):
         """Triggered when an aggregate root is created."""
 
-    class AttributeChanged(Event[TAggregate], TimestampedVersionedEntity.AttributeChanged[TAggregate]):
+    class AttributeChanged(Event[TAggregate], TimestampedEntity.AttributeChanged[TAggregate]):
         """Triggered when an aggregate root attribute is changed."""
-
-    class Discarded(Event[TAggregate], TimestampedVersionedEntity.Discarded[TAggregate]):
-        """Triggered when an aggregate root is discarded."""
 
     def __init__(self, **kwargs: Any) -> None:
         super(BaseAggregateRoot, self).__init__(**kwargs)

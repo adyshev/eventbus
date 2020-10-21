@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 import importlib
-from typing import Any, Dict, Type
+from typing import Any, Dict
 
 from eventbus.domain.exceptions import TopicResolutionError
-from eventbus.domain.versioning import Upcastable
-from eventbus.domain.whitehead import T
 
 
 def get_topic(domain_class: type) -> str:
@@ -63,21 +61,3 @@ def resolve_attr(obj: Any, path: str) -> Any:
     head, _, tail = path.partition(".")
     head_obj = getattr(obj, head)
     return resolve_attr(head_obj, tail)
-
-
-def reconstruct_object(obj_class: Type[T], obj_state: Dict[str, Any]) -> T:
-    """
-    Reconstructs object from given class and state.
-
-    :param obj_class: Class of object to be reconstructed.
-    :param obj_state: State of object to be reconstructed.
-    :return: Reconstructed object.
-    """
-    if issubclass(obj_class, Upcastable):
-        # Upcast the recorded state using the given class.
-        obj_state = obj_class.__upcast_state__(obj_state)
-
-    # Reconstruct the object class instance from the state.
-    obj = object.__new__(obj_class)
-    obj.__dict__.update(obj_state)
-    return obj

@@ -7,11 +7,10 @@ from decimal import Decimal
 from eventbus.domain.decorators import subclassevents
 from eventbus.domain.eventbus import AbstractEventBus
 from eventbus.domain.events import (
-    EventWithOriginatorID, CreatedEvent, AttributeChangedEvent, DiscardedEvent,
-    DomainEvent, EventWithOriginatorVersion, EventWithTimestamp
+    EventWithOriginatorID, CreatedEvent, AttributeChangedEvent,
+    DomainEvent, EventWithTimestamp
 )
-from eventbus.domain.exceptions import OriginatorIDError, EntityIsDiscarded, OriginatorVersionError
-from eventbus.domain.versioning import Upcastable
+from eventbus.domain.exceptions import OriginatorIDError
 from eventbus.domain.whitehead import EnduringObject
 from eventbus.util.topic import get_topic, resolve_topic
 
@@ -29,7 +28,7 @@ TDomainEntity = TypeVar("TDomainEntity", bound="DomainEntity")
 TDomainEvent = TypeVar("TDomainEvent", bound="DomainEntity.Event")
 
 
-class DomainEntity(Upcastable, EnduringObject, metaclass=MetaDomainEntity):
+class DomainEntity(EnduringObject, metaclass=MetaDomainEntity):
     """
     Supertype for domain model entity.
     """
@@ -141,7 +140,6 @@ class DomainEntity(Upcastable, EnduringObject, metaclass=MetaDomainEntity):
         super().__init__()
         self._event_bus = event_bus
         self._id = id
-        self.__is_discarded__ = False
 
     @property
     def id(self) -> UUID:
@@ -181,38 +179,10 @@ class DomainEntity(Upcastable, EnduringObject, metaclass=MetaDomainEntity):
             setattr(obj, self.name, self.value)
             return obj
 
-    async def __discard__(self: TDomainEntity, **kwargs) -> None:
-        """
-        Discards self, by triggering a Discarded event.
-        """
-        event_class: Type["DomainEntity.Discarded[TDomainEntity]"] = self.Discarded
-        await self.__trigger_event__(event_class=event_class, **kwargs)
-
-    class Discarded(DiscardedEvent[TDomainEntity], Event[TDomainEntity]):
-        """
-        Triggered when a DomainEntity is discarded.
-        """
-
-        def __mutate__(self, obj: Optional[TDomainEntity]) -> Optional[TDomainEntity]:
-            obj = super(DomainEntity.Discarded, self).__mutate__(obj)
-            if obj is not None:
-                obj.__is_discarded__ = True
-            return None
-
-    def __assert_not_discarded__(self) -> None:
-        """
-        Asserts that this entity has not been discarded.
-
-        Raises EntityIsDiscarded exception if entity has been discarded already.
-        """
-        if self.__is_discarded__:
-            raise EntityIsDiscarded("Entity is discarded")
-
     async def __trigger_event__(self, event_class: Type[TDomainEvent], **kwargs: Any) -> None:
         """
         Constructs, applies, and publishes a domain event.
         """
-        self.__assert_not_discarded__()
         event: TDomainEvent = event_class(originator_id=self.id, **kwargs)
         self.__mutate__(event)
         await self.__publish__(event)
@@ -269,94 +239,6 @@ class DomainEntity(Upcastable, EnduringObject, metaclass=MetaDomainEntity):
         return not self.__eq__(other)
 
 
-TVersionedEntity = TypeVar("TVersionedEntity", bound="VersionedEntity")
-TVersionedEvent = TypeVar("TVersionedEvent", bound="VersionedEntity.Event")
-
-
-class VersionedEntity(DomainEntity):
-    def __init__(self, __version__: int, **kwargs: Any):
-        super().__init__(**kwargs)
-        self.___version__: int = __version__
-
-    @property
-    def __version__(self) -> int:
-        return self.___version__
-
-    async def __trigger_event__(self, event_class: Type[TDomainEvent], **kwargs: Any) -> None:
-        """
-        Increments the version number when an event is triggered.
-
-        The event carries the version number that the originator
-        will have when the originator is mutated with this event.
-        (The event's "originator" version isn't the version of the
-        originator before the event was triggered, but represents
-        the result of the work of incrementing the version, which
-        is then set in the event as normal. The Created event has
-        version 0, and a newly created instance is at version 0.
-        The second event has originator version 1, and so will the
-        originator when the second event has been applied.
-        """
-        # Do the work of incrementing the version number.
-        next_version = self.__version__ + 1
-        # Trigger an event with the result of this work.
-        await super(VersionedEntity, self).__trigger_event__(
-            event_class=event_class, originator_version=next_version, **kwargs
-        )
-
-    class Event(
-        EventWithOriginatorVersion[TVersionedEntity], DomainEntity.Event[TVersionedEntity],
-    ):
-        """Supertype for events of versioned entities."""
-
-        def __mutate__(self, obj: Optional[TVersionedEntity]) -> Optional[TVersionedEntity]:
-            obj = super(VersionedEntity.Event, self).__mutate__(obj)
-            if obj is not None:
-                obj.___version__ = self.originator_version
-            return obj
-
-        def __check_obj__(self, obj: TVersionedEntity) -> None:
-            """
-            Extends superclass method by checking the event's
-            originator version follows (1 +) this entity's version.
-            """
-            super(VersionedEntity.Event, self).__check_obj__(obj)
-            # Assert the version sequence is correct.
-            if self.originator_version != obj.__version__ + 1:
-                raise OriginatorVersionError(
-                    (
-                        "Event takes entity to version {0}, "
-                        "but entity is currently at version {1}. "
-                        "Event type: '{2}', entity type: '{3}', entity ID: '{4}'"
-                        "".format(
-                            self.originator_version,
-                            obj.__version__,
-                            type(self).__name__,
-                            type(obj).__name__,
-                            obj._id,  # noqa
-                        )
-                    )
-                )
-
-    class Created(DomainEntity.Created[TVersionedEntity], Event[TVersionedEntity]):
-        """Published when a VersionedEntity is created."""
-
-        def __init__(self, originator_version: int = 0, *args: Any, **kwargs: Any):
-            super(VersionedEntity.Created, self).__init__(originator_version=originator_version, *args, **kwargs)
-
-        @property
-        def __entity_kwargs__(self) -> Dict[str, Any]:
-            # Get super property.
-            kwargs = super(VersionedEntity.Created, self).__entity_kwargs__
-            kwargs["__version__"] = kwargs.pop("originator_version")
-            return kwargs
-
-    class AttributeChanged(Event[TVersionedEntity], DomainEntity.AttributeChanged[TVersionedEntity]):
-        """Published when a VersionedEntity is changed."""
-
-    class Discarded(Event[TVersionedEntity], DomainEntity.Discarded[TVersionedEntity]):
-        """Published when a VersionedEntity is discarded."""
-
-
 TTimestampedEntity = TypeVar("TTimestampedEntity", bound="TimestampedEntity")
 
 
@@ -396,37 +278,3 @@ class TimestampedEntity(DomainEntity):
 
     class AttributeChanged(Event[TTimestampedEntity], DomainEntity.AttributeChanged[TTimestampedEntity]):
         """Published when a TimestampedEntity is changed."""
-
-    class Discarded(Event[TTimestampedEntity], DomainEntity.Discarded[TTimestampedEntity]):
-        """Published when a TimestampedEntity is discarded."""
-
-
-TTimestampedVersionedEntity = TypeVar("TTimestampedVersionedEntity", bound="TimestampedVersionedEntity")
-
-
-class TimestampedVersionedEntity(TimestampedEntity, VersionedEntity):
-    class Event(
-        TimestampedEntity.Event[TTimestampedVersionedEntity], VersionedEntity.Event[TTimestampedVersionedEntity],
-    ):
-        """Supertype for events of timestamped, versioned entities."""
-
-    class Created(
-        TimestampedEntity.Created[TTimestampedVersionedEntity],
-        VersionedEntity.Created,
-        Event[TTimestampedVersionedEntity],
-    ):
-        """Published when a TimestampedVersionedEntity is created."""
-
-    class AttributeChanged(
-        Event[TTimestampedVersionedEntity],
-        TimestampedEntity.AttributeChanged[TTimestampedVersionedEntity],
-        VersionedEntity.AttributeChanged[TTimestampedVersionedEntity],
-    ):
-        """Published when a TimestampedVersionedEntity is created."""
-
-    class Discarded(
-        Event[TTimestampedVersionedEntity],
-        TimestampedEntity.Discarded[TTimestampedVersionedEntity],
-        VersionedEntity.Discarded[TTimestampedVersionedEntity],
-    ):
-        """Published when a TimestampedVersionedEntity is discarded."""

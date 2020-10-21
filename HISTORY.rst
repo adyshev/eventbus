@@ -30,4 +30,9 @@ History
 0.1.11 (2020-10-09)
 -------------------
 
-* Adding possibility to specify custom __last_modified__ during entity instantiation
+* Added possibility to specify custom __last_modified__ during entity instantiation
+
+0.1.12 (2020-10-21)
+-------------------
+
+* Removed versioning and discard functionality, we don't need them since we don't have event store/sourcing

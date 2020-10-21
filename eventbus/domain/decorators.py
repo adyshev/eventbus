@@ -23,7 +23,6 @@ def subclassevents(cls: type) -> type:  # noqa
         class Example(AggregateRoot):
             class Event(AggregateRoot.Event): pass
             class Created(Event, AggregateRoot.Created): pass
-            class Discarded(Event, AggregateRoot.Discarded): pass
             class AttributeChanged(Event, AggregateRoot.AttributeChanged): pass
             class SomethingHappened(Event): pass
 

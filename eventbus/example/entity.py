@@ -2,15 +2,15 @@
 from typing import Any, List, Optional
 
 from eventbus.domain.aggregate import BaseAggregateRoot
-from eventbus.domain.entity import TimestampedVersionedEntity
+from eventbus.domain.entity import TimestampedEntity
 
 
-class ExampleInternal(TimestampedVersionedEntity):
+class ExampleInternal(TimestampedEntity):
     def __init__(self, value: int, **kwargs: Any):
         super().__init__(**kwargs)
         self.value = value
 
-    class Event(TimestampedVersionedEntity.Event):
+    class Event(TimestampedEntity.Event):
         pass
 
 

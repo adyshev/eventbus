@@ -3,7 +3,6 @@ from uuid import UUID
 from typing import Any, Generic, Optional
 from decimal import Decimal
 
-from eventbus.domain.versioning import Upcastable
 from eventbus.domain.whitehead import ActualOccasion, TEntity
 from eventbus.util.hashing import hash_object
 from eventbus.util.time import decimaltimestamp
@@ -11,7 +10,7 @@ from eventbus.util.topic import get_topic
 from eventbus.util.transcoding import ObjectJSONEncoder
 
 
-class DomainEvent(Upcastable, ActualOccasion, Generic[TEntity]):
+class DomainEvent(ActualOccasion, Generic[TEntity]):
     """
     Base class for domain model events.
 
@@ -23,7 +22,7 @@ class DomainEvent(Upcastable, ActualOccasion, Generic[TEntity]):
     of the state of the event.
     """
 
-    __json_encoder_v2__ = ObjectJSONEncoder(sort_keys=True)
+    __json_encoder__ = ObjectJSONEncoder(sort_keys=True)
     __notifiable__ = True
 
     def __init__(self, **kwargs: Any):
@@ -89,7 +88,6 @@ class DomainEvent(Upcastable, ActualOccasion, Generic[TEntity]):
         """
         return isinstance(other, DomainEvent) and self.__hash__() == other.__hash__()
 
-    # Todo: Do we need this in Python 3?
     def __ne__(self, other: object) -> bool:
         """
         Negates the equality test.
@@ -114,13 +112,13 @@ class DomainEvent(Upcastable, ActualOccasion, Generic[TEntity]):
         attrs["__event_topic__"] = get_topic(type(self))
 
         # Calculate the cryptographic hash of the event.
-        sha256_hash = self.__hash_object_v2__(attrs)
+        sha256_hash = self.__hash_object__(attrs)
 
         # Return the Python hash of the cryptographic hash.
         return hash(sha256_hash)
 
     @classmethod
-    def __hash_object_v2__(cls, obj: dict) -> str:
+    def __hash_object__(cls, obj: dict) -> str:
         """
         Calculates SHA-256 hash of JSON encoded 'obj'.
 
@@ -128,7 +126,7 @@ class DomainEvent(Upcastable, ActualOccasion, Generic[TEntity]):
         :return: SHA-256 as hexadecimal string.
         :rtype: str
         """
-        return hash_object(cls.__json_encoder_v2__, obj)
+        return hash_object(cls.__json_encoder__, obj)
 
 
 class EventWithOriginatorID(DomainEvent[TEntity]):
@@ -168,27 +166,6 @@ class EventWithTimestamp(DomainEvent[TEntity]):
         return self.__dict__["timestamp"]
 
 
-class EventWithOriginatorVersion(DomainEvent[TEntity]):
-    """
-    For events that have an originator version number.
-    """
-
-    def __init__(self, originator_version: int, **kwargs: Any):
-        if not isinstance(originator_version, int):
-            raise TypeError("Version must be an integer: {0}".format(originator_version))
-        super(EventWithOriginatorVersion, self).__init__(originator_version=originator_version, **kwargs)
-
-    @property
-    def originator_version(self) -> int:
-        """
-        Originator version is the version of the object
-        that originated this event.
-
-        :return: A integer representing the version of the originator.
-        """
-        return self.__dict__["originator_version"]
-
-
 class CreatedEvent(DomainEvent[TEntity]):
     """
     Happens when something is created.
@@ -207,15 +184,3 @@ class AttributeChangedEvent(DomainEvent[TEntity]):
     @property
     def value(self) -> Any:
         return self.__dict__["value"]
-
-
-class DiscardedEvent(DomainEvent[TEntity]):
-    """
-    Happens when something is discarded.
-    """
-
-
-class LoggedEvent(DomainEvent[TEntity]):
-    """
-    Happens when something is logged.
-    """

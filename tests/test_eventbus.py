@@ -52,7 +52,6 @@ async def test_example_entity():
     example = await Example.__create__(event_bus=bus, first_name="First", last_name="Last", age=56)
 
     assert example.__created_on__ == example.__last_modified__
-    assert example.__version__ == 0
 
     assert len(example.__pending_events__) == 1
     assert len(received_events) == 0
@@ -64,17 +63,11 @@ async def test_example_entity():
 
     assert example.__last_modified__ > example.__created_on__
 
-    # 3x "ExampleInternal.Created"
-    assert example.__version__ == len(received_events) == 3
-
     # 1x "Example.Created" + 3x "Example.ExampleInternalAdded"
     assert len(example.__pending_events__) == 4
 
     # 1x "Example.Created" has been published
     await example.__save__()
-
-    # Created should't affect version
-    assert example.__version__ == 3
 
     assert example.summ == 60
 
