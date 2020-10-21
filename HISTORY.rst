@@ -36,3 +36,8 @@ History
 -------------------
 
 * Removed versioning and discard functionality, we don't need them since we don't have event store/sourcing
+
+0.1.13 (2020-10-21)
+-------------------
+
+* Revert 0.1.11, __last_modified__ reverted back to internal only value

@@ -76,31 +76,3 @@ async def test_example_entity():
     # 3x "ExampleInternal.Created" + 1x "Example.Created" + 3x "ExampleInternal.Created"
     assert len(received_events) == 7
 
-    # Clear all the events
-    received_events.clear()
-
-    created = decimaltimestamp()
-    sleep(0.1)
-    updated = decimaltimestamp()
-
-    # We also can instantiate entity with custom __created_on__ and __last_modified__ fields
-    example2 = Example(
-        id=uuid4(),
-        event_bus=bus,
-        first_name="First",
-        last_name="Last",
-        age=56,
-        __version__=0,
-        __created_on__=created,
-        __last_modified__=updated
-    )
-
-    assert example2.__created_on__ != example2.__last_modified__
-    assert example2.__created_on__ == created
-    assert example2.__last_modified__ == updated
-
-    sleep(0.1)
-
-    await example2.add(10)
-
-    assert example2.__last_modified__ > updated

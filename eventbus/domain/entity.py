@@ -243,10 +243,10 @@ TTimestampedEntity = TypeVar("TTimestampedEntity", bound="TimestampedEntity")
 
 
 class TimestampedEntity(DomainEntity):
-    def __init__(self, __created_on__: Decimal, __last_modified__: Optional[Decimal] = None, **kwargs: Any):
+    def __init__(self, __created_on__: Decimal, **kwargs: Any):
         super(TimestampedEntity, self).__init__(**kwargs)
         self.___created_on__ = __created_on__
-        self.___last_modified__ = __last_modified__ or __created_on__
+        self.___last_modified__ = __created_on__
 
     @property
     def __created_on__(self) -> Decimal:
