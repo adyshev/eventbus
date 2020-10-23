@@ -50,7 +50,8 @@ async def test_example_entity():
     # "Example.Created" has been added to a pending list (Domain Root Entity)
     example = await Example.__create__(event_bus=bus, first_name="First", last_name="Last", age=56)
 
-    assert example.__created_on__ == example.__last_modified__
+    # All dates are in default state
+    assert example.__created_on__ == example.__updated_on__ == example.__last_modified__
 
     assert len(example.__pending_events__) == 1
     assert len(received_events) == 0
@@ -60,18 +61,28 @@ async def test_example_entity():
         # "Example.ExampleInternalAdded" bas been added to a pending list (Domain Root Entity)
         await example.add(value)
 
+    # __updated_on__ remains unchanged
     assert example.__last_modified__ > example.__created_on__
+    assert example.__created_on__ == example.__updated_on__
 
-    # 1x "Example.Created" + 3x "Example.ExampleInternalAdded"
-    assert len(example.__pending_events__) == 4
+    await example.__trigger_event__(Example.AttributeChanged, name="first_name", value="First 2")
 
-    # 1x "Example.Created" has been published
+    # Entity mutated immidiatelly
+    assert example.summ == 60
+    assert example.first_name == "First 2"
+
+    # __updated_on__ was changed
+    assert example.__last_modified__ == example.__updated_on__
+    assert example.__updated_on__ > example.__created_on__
+
+    # 1x "Example.Created" + 3x "Example.ExampleInternalAdded + 1x Example.AttributeChanged"
+    assert len(example.__pending_events__) == 5
+
     await example.__save__()
 
-    assert example.summ == 60
-
+    # 1x "Example.Created" + 3x "Example.ExampleInternalAdded + 1x Example.AttributeChanged"
     assert len(example.__pending_events__) == 0
 
-    # 3x "ExampleInternal.Created" + 1x "Example.Created" + 3x "ExampleInternal.Created"
-    assert len(received_events) == 7
+    # 3x "ExampleInternal.Created" + 1x "Example.Created" + 3x "ExampleInternal.Created + 1x Example.AttributeChanged"
+    assert len(received_events) == 8
 

@@ -243,14 +243,19 @@ TTimestampedEntity = TypeVar("TTimestampedEntity", bound="TimestampedEntity")
 
 
 class TimestampedEntity(DomainEntity):
-    def __init__(self, __created_on__: datetime, **kwargs: Any):
+    def __init__(self, __created_on__: datetime, __updated_on__: datetime, **kwargs: Any):
         super(TimestampedEntity, self).__init__(**kwargs)
         self.___created_on__ = __created_on__
+        self.___updated_on__ = __updated_on__
         self.___last_modified__ = __created_on__
 
     @property
     def __created_on__(self) -> datetime:
         return self.___created_on__
+
+    @property
+    def __updated_on__(self) -> datetime:
+        return self.___updated_on__
 
     @property
     def __last_modified__(self) -> datetime:
@@ -273,8 +278,17 @@ class TimestampedEntity(DomainEntity):
         def __entity_kwargs__(self) -> Dict[str, Any]:
             # Get super property.
             kwargs = super(TimestampedEntity.Created, self).__entity_kwargs__
-            kwargs["__created_on__"] = kwargs.pop("timestamp")
+            timestamp = kwargs.pop("timestamp")
+            kwargs["__created_on__"] = timestamp
+            kwargs["__updated_on__"] = timestamp
             return kwargs
 
-    class AttributeChanged(Event[TTimestampedEntity], DomainEntity.AttributeChanged[TTimestampedEntity]):
+    class AttributeChanged(DomainEntity.AttributeChanged[TTimestampedEntity], Event[TTimestampedEntity]):
         """Published when a TimestampedEntity is changed."""
+
+        def __mutate__(self, obj: Optional[TTimestampedEntity]) -> Optional[TTimestampedEntity]:
+            """Updates 'obj' with values from self."""
+            obj = super(TimestampedEntity.AttributeChanged, self).__mutate__(obj)
+            if obj is not None:
+                obj.___updated_on__ = self.timestamp
+            return obj

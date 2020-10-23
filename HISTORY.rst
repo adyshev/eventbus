@@ -42,7 +42,12 @@ History
 
 * Revert 0.1.11, __last_modified__ reverted back to internal only value
 
-0.1.14 (2020-10-21)
+0.1.14 (2020-10-22)
 -------------------
 
 * Time. Moved from Decimal to Datetime format
+
+0.1.15 (2020-10-23)
+-------------------
+
+* Added __updated_on__ parameter to TimestampedEntity. Will be updated by each AttributeChanged event mutation
