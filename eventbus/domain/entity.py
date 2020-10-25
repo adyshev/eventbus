@@ -132,15 +132,16 @@ class DomainEntity(EnduringObject, metaclass=MetaDomainEntity):
             kwargs = self.__dict__.copy()
             kwargs["event_bus"] = kwargs.pop("event_bus")
             kwargs["id"] = kwargs.pop("originator_id")
+            kwargs.pop("discarded", None)
             kwargs.pop("originator_topic", None)
             kwargs.pop("__event_topic__", None)
             return kwargs
 
-    def __init__(self, event_bus: AbstractEventBus, id: UUID, **kwargs):
+    def __init__(self, event_bus: AbstractEventBus, id: UUID, discarded: bool = False, **kwargs):
         super().__init__()
         self._event_bus = event_bus
         self._id = id
-        self.__is_discarded__ = False
+        self.__is_discarded__ = discarded
 
     @property
     def id(self) -> UUID:

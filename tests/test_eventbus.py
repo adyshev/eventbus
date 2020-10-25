@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from time import sleep
+from datetime import datetime, timezone
 from typing import List, Optional, Union, Type, Tuple
 from uuid import uuid4
 
@@ -9,7 +9,7 @@ from eventbus.application.eventbus import EventBus
 from eventbus.domain.eventbus import AbstractEventHandler
 from eventbus.domain.events import DomainEvent
 from eventbus.domain.exceptions import EntityIsDiscarded
-from eventbus.domain.whitehead import TEvent, T
+from eventbus.domain.whitehead import TEvent
 from eventbus.example.entity import Example
 
 
@@ -93,3 +93,31 @@ async def test_example_entity():
     with pytest.raises(EntityIsDiscarded):
         await example.__trigger_event__(Example.AttributeChanged, name="first_name", value="First 2")
 
+    # Instantiate entity with discarted state
+    now = datetime.now(tz=timezone.utc)
+    another_example = Example(
+        id=uuid4(),
+        event_bus=bus,
+        first_name="First #2",
+        last_name="Last #2",
+        age=56,
+        discarded=True,
+        __created_on__=now,
+        __updated_on__=now
+    )
+
+    # Rises EntityIsDiscarded if event sent for discarded entity
+    with pytest.raises(EntityIsDiscarded):
+        await another_example.__trigger_event__(Example.AttributeChanged, name="first_name", value="First #3")
+
+    # Create entity with discarted state
+    another_example = await Example.__create__(
+        event_bus=bus,
+        first_name="First #2",
+        last_name="Last #2",
+        age=56,
+        discarded=True
+    )
+
+    # Discarded state cannot be set via __create__ method
+    assert another_example.__is_discarded__ is False

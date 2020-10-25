@@ -56,3 +56,8 @@ History
 -------------------
 
 * Reverted Discard functionality from 0.1.12
+
+0.1.17 (2020-10-25)
+-------------------
+
+* Adding possibility to set discarded state for entity instantiation (but not for creation)
