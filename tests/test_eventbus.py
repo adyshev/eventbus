@@ -8,6 +8,7 @@ import pytest
 from eventbus.application.eventbus import EventBus
 from eventbus.domain.eventbus import AbstractEventHandler
 from eventbus.domain.events import DomainEvent
+from eventbus.domain.exceptions import EntityIsDiscarded
 from eventbus.domain.whitehead import TEvent, T
 from eventbus.example.entity import Example
 
@@ -85,4 +86,10 @@ async def test_example_entity():
 
     # 3x "ExampleInternal.Created" + 1x "Example.Created" + 3x "ExampleInternal.Created + 1x Example.AttributeChanged"
     assert len(received_events) == 8
+
+    await example.__discard__()
+
+    # Rises EntityIsDiscarded if event sent for discarded entity
+    with pytest.raises(EntityIsDiscarded):
+        await example.__trigger_event__(Example.AttributeChanged, name="first_name", value="First 2")
 

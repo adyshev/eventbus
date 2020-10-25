@@ -51,3 +51,8 @@ History
 -------------------
 
 * Added __updated_on__ parameter to TimestampedEntity. Will be updated by each AttributeChanged event mutation
+
+0.1.16 (2020-10-25)
+-------------------
+
+* Reverted Discard functionality from 0.1.12

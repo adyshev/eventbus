@@ -24,6 +24,7 @@ def subclassevents(cls: type) -> type:  # noqa
             class Event(AggregateRoot.Event): pass
             class Created(Event, AggregateRoot.Created): pass
             class AttributeChanged(Event, AggregateRoot.AttributeChanged): pass
+            class Discarded(Event, AggregateRoot.Discarded): pass
             class SomethingHappened(Event): pass
 
     You can apply this to a tree of domain event classes by defining

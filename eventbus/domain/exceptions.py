@@ -11,5 +11,9 @@ class OriginatorIDError(DomainEventError):
     """Raised when applying an event to the wrong entity or aggregate."""
 
 
+class EntityIsDiscarded(AssertionError):
+    """Raised when access to a recently discarded entity object is attempted."""
+
+
 class EncoderTypeError(TypeError):
     pass

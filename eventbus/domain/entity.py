@@ -8,9 +8,9 @@ from eventbus.domain.decorators import subclassevents
 from eventbus.domain.eventbus import AbstractEventBus
 from eventbus.domain.events import (
     EventWithOriginatorID, CreatedEvent, AttributeChangedEvent,
-    DomainEvent, EventWithTimestamp
+    DomainEvent, EventWithTimestamp, DiscardedEvent
 )
-from eventbus.domain.exceptions import OriginatorIDError
+from eventbus.domain.exceptions import OriginatorIDError, EntityIsDiscarded
 from eventbus.domain.whitehead import EnduringObject
 from eventbus.util.topic import get_topic, resolve_topic
 
@@ -140,6 +140,7 @@ class DomainEntity(EnduringObject, metaclass=MetaDomainEntity):
         super().__init__()
         self._event_bus = event_bus
         self._id = id
+        self.__is_discarded__ = False
 
     @property
     def id(self) -> UUID:
@@ -161,14 +162,6 @@ class DomainEntity(EnduringObject, metaclass=MetaDomainEntity):
     def event_bus(self) -> AbstractEventBus:
         return self._event_bus
 
-    async def __change_attribute__(self: TDomainEntity, name: str, value: Any, **kwargs) -> None:
-        """
-        Changes named attribute with the given value,
-        by triggering an AttributeChanged event.
-        """
-        event_class: Type["DomainEntity.AttributeChanged[TDomainEntity]"] = self.AttributeChanged
-        await self.__trigger_event__(event_class=event_class, name=name, value=value, **kwargs)
-
     class AttributeChanged(Event[TDomainEntity], AttributeChangedEvent[TDomainEntity]):
         """
         Triggered when a named attribute is assigned a new value.
@@ -179,10 +172,46 @@ class DomainEntity(EnduringObject, metaclass=MetaDomainEntity):
             setattr(obj, self.name, self.value)
             return obj
 
+    async def __change_attribute__(self: TDomainEntity, name: str, value: Any, **kwargs) -> None:
+        """
+        Changes named attribute with the given value,
+        by triggering an AttributeChanged event.
+        """
+        event_class: Type["DomainEntity.AttributeChanged[TDomainEntity]"] = self.AttributeChanged
+        await self.__trigger_event__(event_class=event_class, name=name, value=value, **kwargs)
+
+    class Discarded(DiscardedEvent[TDomainEntity], Event[TDomainEntity]):
+        """
+        Triggered when a DomainEntity is discarded.
+        """
+
+        def __mutate__(self, obj: Optional[TDomainEntity]) -> Optional[TDomainEntity]:
+            obj = super(DomainEntity.Discarded, self).__mutate__(obj)
+            if obj is not None:
+                obj.__is_discarded__ = True
+            return None
+
+    async def __discard__(self: TDomainEntity, **kwargs) -> None:
+        """
+        Discards self, by triggering a Discarded event.
+        """
+        event_class: Type["DomainEntity.Discarded[TDomainEntity]"] = self.Discarded
+        await self.__trigger_event__(event_class=event_class, **kwargs)
+
+    def __assert_not_discarded__(self) -> None:
+        """
+        Asserts that this entity has not been discarded.
+
+        Raises EntityIsDiscarded exception if entity has been discarded already.
+        """
+        if self.__is_discarded__:
+            raise EntityIsDiscarded("Entity is discarded")
+
     async def __trigger_event__(self, event_class: Type[TDomainEvent], **kwargs: Any) -> None:
         """
         Constructs, applies, and publishes a domain event.
         """
+        self.__assert_not_discarded__()
         event: TDomainEvent = event_class(originator_id=self.id, **kwargs)
         self.__mutate__(event)
         await self.__publish__(event)
@@ -292,3 +321,6 @@ class TimestampedEntity(DomainEntity):
             if obj is not None:
                 obj.___updated_on__ = self.timestamp
             return obj
+
+    class Discarded(Event[TTimestampedEntity], DomainEntity.Discarded[TTimestampedEntity]):
+        """Published when a TimestampedEntity is discarded."""

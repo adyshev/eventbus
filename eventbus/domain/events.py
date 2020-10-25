@@ -171,6 +171,12 @@ class CreatedEvent(DomainEvent[TEntity]):
     """
 
 
+class DiscardedEvent(DomainEvent[TEntity]):
+    """
+    Happens when something is discarded.
+    """
+
+
 class AttributeChangedEvent(DomainEvent[TEntity]):
     """
     Happens when the value of an attribute changes.
