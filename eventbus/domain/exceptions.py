@@ -7,8 +7,20 @@ class TopicResolutionError(DomainEventError):
     """Raised when unable to resolve a topic to a Python class."""
 
 
-class OriginatorIDError(DomainEventError):
+class ConsistencyError(DomainEventError):
+    """Raised when applying an event stream to a versioned entity."""
+
+
+class MismatchedOriginatorError(ConsistencyError):
+    """Raised when applying an event to an inappropriate object."""
+
+
+class OriginatorIDError(MismatchedOriginatorError):
     """Raised when applying an event to the wrong entity or aggregate."""
+
+
+class OriginatorVersionError(MismatchedOriginatorError):
+    """Raised when applying an event to the wrong version of an entity or aggregate."""
 
 
 class EntityIsDiscarded(AssertionError):

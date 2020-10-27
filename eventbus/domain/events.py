@@ -165,6 +165,27 @@ class EventWithTimestamp(DomainEvent[TEntity]):
         return self.__dict__["timestamp"]
 
 
+class EventWithOriginatorVersion(DomainEvent[TEntity]):
+    """
+    For events that have an originator version number.
+    """
+
+    def __init__(self, originator_version: int, **kwargs: Any):
+        if not isinstance(originator_version, int):
+            raise TypeError("Version must be an integer: {0}".format(originator_version))
+        super(EventWithOriginatorVersion, self).__init__(originator_version=originator_version, **kwargs)
+
+    @property
+    def originator_version(self) -> int:
+        """
+        Originator version is the version of the object
+        that originated this event.
+
+        :return: A integer representing the version of the originator.
+        """
+        return self.__dict__["originator_version"]
+
+
 class CreatedEvent(DomainEvent[TEntity]):
     """
     Happens when something is created.

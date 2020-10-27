@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime, timezone
+import random
 from typing import List, Optional, Union, Type, Tuple
 from uuid import uuid4
 
@@ -8,9 +9,9 @@ import pytest
 from eventbus.application.eventbus import EventBus
 from eventbus.domain.eventbus import AbstractEventHandler
 from eventbus.domain.events import DomainEvent
-from eventbus.domain.exceptions import EntityIsDiscarded
+from eventbus.domain.exceptions import EntityIsDiscarded, OriginatorVersionError, OriginatorIDError
 from eventbus.domain.whitehead import TEvent
-from eventbus.example.entity import Example
+from eventbus.example.entity import Example, ExampleInternal
 
 
 @pytest.mark.asyncio
@@ -50,6 +51,7 @@ async def test_example_entity():
 
     # "Example.Created" has been added to a pending list (Domain Root Entity)
     example = await Example.__create__(event_bus=bus, first_name="First", last_name="Last", age=56)
+    assert example.__version__ == 0
 
     # All dates are in default state
     assert example.__created_on__ == example.__updated_on__ == example.__last_modified__
@@ -62,11 +64,15 @@ async def test_example_entity():
         # "Example.ExampleInternalAdded" bas been added to a pending list (Domain Root Entity)
         await example.add(value)
 
+    assert example.__version__ == 3
+
     # __updated_on__ remains unchanged
     assert example.__last_modified__ > example.__created_on__
     assert example.__created_on__ == example.__updated_on__
 
     await example.__trigger_event__(Example.AttributeChanged, name="first_name", value="First 2")
+
+    assert example.__version__ == 4
 
     # Entity mutated immidiatelly
     assert example.summ == 60
@@ -102,6 +108,7 @@ async def test_example_entity():
         last_name="Last #2",
         age=56,
         discarded=True,
+        __version__=0,
         __created_on__=now,
         __updated_on__=now
     )
@@ -121,3 +128,17 @@ async def test_example_entity():
 
     # Discarded state cannot be set via __create__ method
     assert another_example.__is_discarded__ is False
+
+    # Trying to mutate entity by ivent with invalid version
+    assert another_example.__version__ == 0
+    # originator_version - version of entity after mutation by this event (in this case valid value is 1)
+    event = Example.Event(originator_id=another_example.id, originator_version=100)
+
+    with pytest.raises(OriginatorVersionError):
+        another_example.__mutate__(event)
+
+    # Trying to apply event with invalid originator_id, valid value is another_example.id
+    event = Example.Event(originator_id=uuid4(), originator_version=1)
+
+    with pytest.raises(OriginatorIDError):
+        another_example.__mutate__(event)

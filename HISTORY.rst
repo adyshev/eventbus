@@ -61,3 +61,8 @@ History
 -------------------
 
 * Adding possibility to set discarded state for entity instantiation (but not for creation)
+
+0.1.18 (2020-10-27)
+-------------------
+
+* Reverted Versioning but not Upcasting
