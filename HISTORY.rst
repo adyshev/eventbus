@@ -70,4 +70,4 @@ History
 0.1.19 (2020-11-02)
 -------------------
 
-* Depricating EventBus class. Move events accumulator to global space.
+* Depricating EventBus/AbstractEventBus classes. Move events accumulator to global space.
