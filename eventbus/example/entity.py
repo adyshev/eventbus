@@ -43,5 +43,5 @@ class Example(BaseAggregateRoot):
             obj.internals.append(self.internal)
 
     async def add(self, value: int):
-        internal = await ExampleInternal.__create__(event_bus=self.event_bus, value=value)
+        internal = await ExampleInternal.__create__(value=value)
         await self.__trigger_event__(Example.ExampleInternalAdded, internal=internal)

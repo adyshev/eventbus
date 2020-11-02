@@ -2,6 +2,7 @@
 from typing import Any, List, Deque, Union, Generic, TypeVar
 from collections import deque
 
+from eventbus.application.eventbus import publish
 from eventbus.domain.entity import TimestampedVersionedEntity, DomainEntity, TDomainEvent
 from eventbus.domain.events import DomainEvent
 
@@ -48,7 +49,7 @@ class BaseAggregateRoot(TimestampedVersionedEntity, Generic[TAggregateEvent]):
         """
         batch_of_events = self.__batch_pending_events__()
         if batch_of_events:
-            await self._event_bus.publish(batch_of_events)
+            await publish(batch_of_events)
             # Don't catch exception and put the events back on the queue.
             # Losing them here is consistent with the behaviour of DomainEntity
             # when an event cannot be stored: the event is effectively lost, the

@@ -23,17 +23,3 @@ class AbstractEventHandler(ABC):
     @abstractmethod
     async def handler(self, events: List[TEvent]):
         pass
-
-
-class AbstractEventBus(ABC):
-    @abstractmethod
-    def subscribe(self, handler: AbstractEventHandler) -> None:
-        pass
-
-    @abstractmethod
-    def unsubscribe(self, handler: AbstractEventHandler) -> None:
-        pass
-
-    @abstractmethod
-    async def publish(self, events: List[TEvent]) -> None:
-        pass

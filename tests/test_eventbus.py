@@ -6,12 +6,12 @@ from uuid import uuid4
 
 import pytest
 
-from eventbus.application.eventbus import EventBus
+from eventbus.application.eventbus import subscribe
 from eventbus.domain.eventbus import AbstractEventHandler
 from eventbus.domain.events import DomainEvent
 from eventbus.domain.exceptions import EntityIsDiscarded, OriginatorVersionError, OriginatorIDError
 from eventbus.domain.whitehead import TEvent
-from eventbus.example.entity import Example, ExampleInternal
+from eventbus.example.entity import Example
 
 
 @pytest.mark.asyncio
@@ -40,17 +40,13 @@ async def test_example_entity():
     handler1 = AllEventsTestHandler()
     handler2 = NonExistentEventsTestHandler()
 
-    bus = EventBus(handlers=[
-        handler1, handler2
-    ])
-
     # Same instance of handler will be skipped
-    bus.subscribe(handler1)
+    subscribe(handler1)
     # No such events thus skipping as well
-    bus.subscribe(handler2)
+    subscribe(handler2)
 
     # "Example.Created" has been added to a pending list (Domain Root Entity)
-    example = await Example.__create__(event_bus=bus, first_name="First", last_name="Last", age=56)
+    example = await Example.__create__(first_name="First", last_name="Last", age=56)
     assert example.__version__ == 0
 
     # All dates are in default state
@@ -103,7 +99,6 @@ async def test_example_entity():
     now = datetime.now(tz=timezone.utc)
     another_example = Example(
         id=uuid4(),
-        event_bus=bus,
         first_name="First #2",
         last_name="Last #2",
         age=56,
@@ -119,7 +114,6 @@ async def test_example_entity():
 
     # Create entity with discarted state
     another_example = await Example.__create__(
-        event_bus=bus,
         first_name="First #2",
         last_name="Last #2",
         age=56,

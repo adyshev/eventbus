@@ -66,3 +66,8 @@ History
 -------------------
 
 * Reverted Versioning but not Upcasting
+
+0.1.19 (2020-11-02)
+-------------------
+
+* Depricating EventBus class. Move events accumulator to global space.

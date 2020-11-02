@@ -4,8 +4,8 @@ from datetime import datetime
 from uuid import UUID, uuid4
 from typing import Any, Dict, List, Type, Union, TypeVar, Optional
 
+from eventbus.application.eventbus import publish
 from eventbus.domain.decorators import subclassevents
-from eventbus.domain.eventbus import AbstractEventBus
 from eventbus.domain.events import (
     EventWithOriginatorID, CreatedEvent, AttributeChangedEvent,
     DomainEvent, EventWithOriginatorVersion, EventWithTimestamp, DiscardedEvent
@@ -57,7 +57,6 @@ class DomainEntity(EnduringObject, metaclass=MetaDomainEntity):
     @classmethod
     async def __create__(
         cls: Type[TDomainEntity],
-        event_bus: AbstractEventBus,
         originator_id: Optional[UUID] = None,
         event_class: Optional[Type["DomainEntity.Created[TDomainEntity]"]] = None,
         **kwargs: Any,
@@ -86,7 +85,7 @@ class DomainEntity(EnduringObject, metaclass=MetaDomainEntity):
             created_event_class = event_class
 
         event = created_event_class(
-            event_bus=event_bus, originator_id=originator_id, originator_topic=get_topic(cls), **kwargs
+            originator_id=originator_id, originator_topic=get_topic(cls), **kwargs
         )
 
         obj = event.__mutate__(None)
@@ -102,9 +101,9 @@ class DomainEntity(EnduringObject, metaclass=MetaDomainEntity):
         Triggered when an entity is created.
         """
 
-        def __init__(self, event_bus: AbstractEventBus, originator_topic: str, **kwargs: Any):
+        def __init__(self, originator_topic: str, **kwargs: Any):
             super(DomainEntity.Created, self).__init__(
-                event_bus=event_bus, originator_topic=originator_topic, **kwargs
+                originator_topic=originator_topic, **kwargs
             )
 
         @property
@@ -130,16 +129,14 @@ class DomainEntity(EnduringObject, metaclass=MetaDomainEntity):
         @property
         def __entity_kwargs__(self) -> Dict[str, Any]:
             kwargs = self.__dict__.copy()
-            kwargs["event_bus"] = kwargs.pop("event_bus")
             kwargs["id"] = kwargs.pop("originator_id")
             kwargs.pop("discarded", None)
             kwargs.pop("originator_topic", None)
             kwargs.pop("__event_topic__", None)
             return kwargs
 
-    def __init__(self, event_bus: AbstractEventBus, id: UUID, discarded: bool = False, **kwargs):
+    def __init__(self, id: UUID, discarded: bool = False, **kwargs):
         super().__init__()
-        self._event_bus = event_bus
         self._id = id
         self.__is_discarded__ = discarded
 
@@ -158,10 +155,6 @@ class DomainEntity(EnduringObject, metaclass=MetaDomainEntity):
         attribute name, because by definition all domain entities have an ID.
         """
         return self._id
-
-    @property
-    def event_bus(self) -> AbstractEventBus:
-        return self._event_bus
 
     class AttributeChanged(Event[TDomainEntity], AttributeChangedEvent[TDomainEntity]):
         """
@@ -261,7 +254,7 @@ class DomainEntity(EnduringObject, metaclass=MetaDomainEntity):
         if isinstance(events, DomainEvent):
             events = [events]
 
-        await self._event_bus.publish(events)
+        await publish(events)
 
     def __eq__(self, other: object) -> bool:
         return type(self) == type(other) and self.__dict__ == other.__dict__
