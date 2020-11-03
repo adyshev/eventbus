@@ -3,6 +3,7 @@ import importlib
 from typing import Any, Dict
 
 from eventbus.domain.exceptions import TopicResolutionError
+from eventbus.domain.whitehead import TEvent
 
 
 def get_topic(domain_class: type) -> str:
@@ -61,3 +62,14 @@ def resolve_attr(obj: Any, path: str) -> Any:
     head, _, tail = path.partition(".")
     head_obj = getattr(obj, head)
     return resolve_attr(head_obj, tail)
+
+
+def get_entity(event: TEvent):
+    """
+    Get Originator Entity by event
+
+    :param event: Domain event
+    :return: Domain Entity
+    """
+    entity_class = resolve_topic(event.originator_topic)
+    return entity_class(**event.__entity_kwargs__)

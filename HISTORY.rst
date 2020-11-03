@@ -71,3 +71,8 @@ History
 -------------------
 
 * Depricating EventBus/AbstractEventBus classes. Move events accumulator to global space.
+
+0.1.20 (2020-11-03)
+-------------------
+
+* Adding get_entity function

@@ -12,6 +12,7 @@ from eventbus.domain.events import DomainEvent
 from eventbus.domain.exceptions import EntityIsDiscarded, OriginatorVersionError, OriginatorIDError
 from eventbus.domain.whitehead import TEvent
 from eventbus.example.entity import Example
+from eventbus.util.topic import get_entity
 
 
 @pytest.mark.asyncio
@@ -45,14 +46,22 @@ async def test_example_entity():
     # No such events thus skipping as well
     subscribe(handler2)
 
-    # "Example.Created" has been added to a pending list (Domain Root Entity)
     example = await Example.__create__(first_name="First", last_name="Last", age=56)
     assert example.__version__ == 0
 
     # All dates are in default state
     assert example.__created_on__ == example.__updated_on__ == example.__last_modified__
 
+    # "Example.Created" has been added to a pending list (Domain Root Entity)
     assert len(example.__pending_events__) == 1
+
+    # Trying to revive entity from created event
+    event = example.__pending_events__.popleft()
+    revived_example = get_entity(event)
+    assert example == revived_example
+    # Restore
+    example.__pending_events__.append(event)
+
     assert len(received_events) == 0
 
     for value in [10, 20, 30]:
