@@ -3,7 +3,7 @@ import importlib
 from typing import Any, Dict
 
 from eventbus.domain.exceptions import TopicResolutionError
-from eventbus.domain.whitehead import TEvent
+from eventbus.domain.whitehead import TEvent, TEntity
 
 
 def get_topic(domain_class: type) -> str:
@@ -64,12 +64,15 @@ def resolve_attr(obj: Any, path: str) -> Any:
     return resolve_attr(head_obj, tail)
 
 
-def get_entity(event: TEvent):
+def get_entity(event: TEvent) -> TEntity:
     """
-    Get Originator Entity by event
+    Get Originator Entity by event.
+
+    To support get_entity, event should provice originator_topic and __entity_kwargs__ properties
+    Only Created event supports this protocol out of the box
 
     :param event: Domain event
-    :return: Domain Entity
+    :return: Domain entity
     """
     entity_class = resolve_topic(event.originator_topic)
     return entity_class(**event.__entity_kwargs__)

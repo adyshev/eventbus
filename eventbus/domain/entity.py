@@ -12,7 +12,7 @@ from eventbus.domain.events import (
 )
 from eventbus.domain.exceptions import OriginatorIDError, EntityIsDiscarded, OriginatorVersionError
 from eventbus.domain.whitehead import EnduringObject
-from eventbus.util.topic import get_topic, resolve_topic
+from eventbus.util.topic import get_topic, resolve_topic, get_entity
 
 
 class MetaDomainEntity(ABCMeta):
@@ -123,8 +123,7 @@ class DomainEntity(EnduringObject, metaclass=MetaDomainEntity):
 
             entity_class: Class of domain entity to be constructed.
             """
-            entity_class: Type[TDomainEntity] = resolve_topic(self.originator_topic)
-            return entity_class(**self.__entity_kwargs__)
+            return get_entity(self)
 
         @property
         def __entity_kwargs__(self) -> Dict[str, Any]:
