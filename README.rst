@@ -6,7 +6,7 @@ Domain Entities, Root Aggregate, Events and EventBus with Async flavor
         :target: https://pypi.python.org/pypi/domain-eventbus
 
 .. image:: https://img.shields.io/travis/adyshev/eventbus.svg
-        :target: https://travis-ci.com/adyshev/eventbus
+        :target: https://travis-ci.org/adyshev/eventbus
 
 .. image:: https://readthedocs.org/projects/eventbus/badge/?version=latest
         :target: https://eventbus.readthedocs.io/en/latest/?badge=latest
